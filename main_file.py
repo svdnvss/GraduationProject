@@ -2,14 +2,7 @@ import xlrd
 import numpy as np
 import math
 from math import fabs
-from xlutils.copy import copy as xlcopy
-import matplotlib.pyplot as plt
 import datetime
-from sympy.solvers import solve
-from sympy import Symbol
-from sympy import diff
-import scipy.optimize
-from scipy.optimize import curve_fit
 import xlsxwriter
 
 wb = xlrd.open_workbook('input/Пример3_.xlsx')
@@ -160,12 +153,10 @@ def franc(x, y, wc):
     def act_forec(wc, a, b):
         """Нахождение активных извлекаемых запасов нефти """
         f_oil = 1 - wc
-        #active = (1 / f_oil - b) / (2 * a)
         active = (1 / (2 * a * f_oil)) - (b / (2 * a))
 
         """Нахождение прогнозной накопленной добычи жидкости """
         forec_liq = a * (active ** 2) + b * active
-        #forec_liq = np.append(forec_liq, temp)
 
         """Нахождение прогнозной накопленной добычи нефти """
         forec_oil = forec_liq - (a * (active ** 2) + (b - 1) * active)
@@ -203,8 +194,6 @@ def sippas(x, y, wc):
 
         """Нахождение прогнозной накопленной добычи нефти """
         forec_oil = forec_liq - active
-        #temp = forec_liq[i] - temp
-        #forec_oil = np.append(forec_oil, temp)
         return (active, forec_liq, forec_oil)
 
     active, forec_liq, forec_oil = act_forec(wc, a, b)
@@ -237,14 +226,8 @@ def abyzbaev_main(x, y, wc):
         forec_liq = np.exp(b) * (active ** a)
 
         """Нахождение прогнозной накопленной добычи нефти """
-        #forec_oil = np.array([])
-        #for i in range(len(q_oil)):
-        #    '''temp = np.exp(b) * (q_oil[i] ** a)
-        #    temp = temp - q_oil[i]
-        #    temp = forec_liq[i] - temp'''
         temp = forec_liq - (np.exp(b) * (active ** a))
         forec_oil = forec_liq - temp
-        #forec_oil = np.append(forec_oil, temp)
         return (active, forec_liq, forec_oil)
 
     active, forec_liq, forec_oil = act_forec(wc, a, b)
@@ -273,18 +256,13 @@ def abyzbaev_mod1(x, y, wc):
         active = (1 / ((a + 1) * np.exp(b) * f_oil)) ** (1 / a)
 
         """Нахождение прогнозной накопленной добычи жидкости """
-        #forec_liq = np.array([])
-        #for i in range(len(q_oil)):
         forec_liq = np.exp(b) * (active ** (a + 1))
-        #forec_liq = np.append(forec_liq, temp)
 
         """Нахождение прогнозной накопленной добычи нефти """
         forec_oil = np.array([])
-        #for i in range(len(q_oil)):
         temp = np.exp(b) * (active ** (a + 1))
         temp = temp - active
         forec_oil = forec_liq - temp
-        #forec_oil = np.append(forec_oil, temp)
         return (active, forec_liq, forec_oil)
 
     active, forec_liq, forec_oil = act_forec(wc, a, b)
@@ -313,18 +291,12 @@ def abyzbaev_mod2(x, y, wc):
         active = ((1 - a) / ((np.exp(b / (1 - a))) * f_oil)) ** (1 - a)
 
         """Нахождение прогнозной накопленной добычи жидкости """
-        #forec_liq = np.array([])
-        #for i in range(len(q_oil)):
         forec_liq = np.exp(b / (1 - a)) * (active ** (1 / (1 - a)))
-        #forec_liq = np.append(forec_liq, temp)
 
         """Нахождение прогнозной накопленной добычи нефти """
-        #forec_oil = np.array([])
-        #for i in range(len(q_oil)):
         temp = np.exp(b / (1 - a)) * (active ** (1 / (1 - a)))
         temp = temp - active
         forec_oil = forec_liq - temp
-        #forec_oil = np.append(forec_oil, temp)
         return (active, forec_liq, forec_oil)
 
     active, forec_liq, forec_oil = act_forec(wc, a, b)
@@ -363,16 +335,10 @@ def govor(x, y, wc):
         active = ((1 - f_oil) / (a * np.exp(b) * f_oil)) ** (1 / (a - 1))
 
         """Нахождение прогнозной накопленной добычи жидкости """
-        #forec_liq = np.array([])
-        #for i in range(len(q_oil)):
         forec_liq = np.exp(b) * (active ** a)
-        #forec_liq = np.append(forec_liq, temp)
 
         """Нахождение прогнозной накопленной добычи нефти """
-        #forec_oil = np.array([])
-        #for i in range(len(q_oil)):
         forec_oil = forec_liq - (np.exp(b) * (active ** a))
-        #forec_oil = np.append(forec_oil, temp)
         return (active, forec_liq, forec_oil)
 
     active, forec_liq, forec_oil = act_forec(wc, a, b)
@@ -423,14 +389,6 @@ def check_qual(forec_liq):
 
 
 def output():
-    """
-    global mseCnts
-    
-    global methodsCount
-    methodsCount = 0
-    mseCnts = []
-    mapeCnts = []
-    """
     global mapeCnts
     mapeCnts = np.array([])
     global mapeNames
@@ -766,7 +724,6 @@ def output():
 
 def print_method(worksheet, bold, i, q_liq, name, needed_columns, colum, a, b, active, fore_liq, fore_oil, comp_q_liq,
                  calc=0, comp_q_liq2 = 0):
-    #r, mseCount, mapeCount = check_qual(fore_liq)
 
     if (calc == 1):
         mapeCount = check_qual(comp_q_liq2)
@@ -807,11 +764,8 @@ def print_method(worksheet, bold, i, q_liq, name, needed_columns, colum, a, b, a
 
     for j in range(len(q_liq)):
         if (calc == 1):
-            #worksheet.write(3 + colum + (needed_columns * i), 11 + j, np.log(q_liq[j] - q_oil[j]))
-            #worksheet.write(4 + colum + (needed_columns * i), 11 + j, comp_q_liq[j])
             worksheet.write(1 + colum + (needed_columns * i), 11 + j, q_liq[j])
             worksheet.write(2 + colum + (needed_columns * i), 11 + j, comp_q_liq2[j])
-    #write_sheet.write(5 + colum + (needed_columns * i), 10, fore_oil)
 
 
 def main():
